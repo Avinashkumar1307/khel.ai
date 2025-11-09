@@ -571,10 +571,10 @@ function App() {
           </div>
         </div>
 
-        <div className="scroll-indicator">
+        {/* <div className="scroll-indicator">
           <div className="scroll-arrow">↓</div>
           <span>Scroll to explore</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Content Sections */}
