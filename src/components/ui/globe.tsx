@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -11,6 +11,7 @@ export interface PinData {
   details: string;
   location: string;
   image?: string;
+  icon?: string;
 }
 
 export interface GlobeConfig {
@@ -49,35 +50,14 @@ const latLngToVector3 = (lat: number, lng: number, radius: number): [number, num
   return [x, y, z];
 };
 
-// Animated Ring Component
-const AnimatedRing = ({ radius, delay }: { radius: number; delay: number }) => {
-  const ringRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (ringRef.current) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2 + delay) * 0.3;
-      const opacity = Math.max(0, 1 - (scale - 1) * 2);
-      ringRef.current.scale.set(scale, scale, 1);
-      if (ringRef.current.material instanceof THREE.MeshBasicMaterial) {
-        ringRef.current.material.opacity = opacity * 0.5;
-      }
-    }
-  });
-
-  return (
-    <mesh ref={ringRef}>
-      <ringGeometry args={[radius * 0.8, radius, 32]} />
-      <meshBasicMaterial color="#00d9ff" transparent opacity={0.5} side={THREE.DoubleSide} />
-    </mesh>
-  );
-};
-
 // Marker Component with Hover Popup
 const Marker = ({ pin, radius, markerColor }: { pin: PinData; radius: number; markerColor: string }) => {
   const [hovered, setHovered] = useState(false);
-  const markerRef = useRef<THREE.Mesh>(null);
+  const [visible, setVisible] = useState(true);
+  const { camera } = useThree();
+
   const position = useMemo(
-    () => latLngToVector3(pin.lat, pin.lng, radius * 1.01),
+    () => latLngToVector3(pin.lat, pin.lng, radius * 1.015),
     [pin.lat, pin.lng, radius]
   );
 
@@ -88,18 +68,22 @@ const Marker = ({ pin, radius, markerColor }: { pin: PinData; radius: number; ma
     return [phi, 0, -theta] as [number, number, number];
   }, [pin.lat, pin.lng]);
 
-  useFrame((state) => {
-    if (markerRef.current) {
-      const pulse = Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1;
-      markerRef.current.scale.set(pulse, pulse, pulse);
-    }
+  // Check if marker is visible (on front side of globe)
+  useFrame(() => {
+    const markerWorldPos = new THREE.Vector3(...position);
+    const cameraDir = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0, 0, 0)).normalize();
+    const markerDir = markerWorldPos.clone().normalize();
+    const dot = cameraDir.dot(markerDir);
+    setVisible(dot > 0.1);
   });
+
+  if (!visible) return null;
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Main glowing sphere */}
+      {/* Pin Circle Background */}
       <mesh
-        ref={markerRef}
+        position={[0, 0, 0.001]}
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
@@ -110,38 +94,54 @@ const Marker = ({ pin, radius, markerColor }: { pin: PinData; radius: number; ma
           document.body.style.cursor = "default";
         }}
       >
-        <sphereGeometry args={[0.03, 32, 32]} />
-        <meshBasicMaterial color={markerColor} />
+        <circleGeometry args={[0.022, 32]} />
+        <meshBasicMaterial color={markerColor} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Inner glow */}
-      <mesh>
-        <sphereGeometry args={[0.04, 32, 32]} />
-        <meshBasicMaterial color={markerColor} transparent opacity={0.3} />
-      </mesh>
+      {/* Pin Icon */}
+      <Html
+        distanceFactor={10}
+        position={[0, 0, 0.002]}
+        center
+        style={{ pointerEvents: "none" }}
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </Html>
 
-      {/* Outer glow */}
-      <mesh>
-        <sphereGeometry args={[0.06, 32, 32]} />
-        <meshBasicMaterial color={markerColor} transparent opacity={0.15} />
-      </mesh>
-
-      {/* Animated Rings */}
-      <AnimatedRing radius={0.08} delay={0} />
-      <AnimatedRing radius={0.08} delay={Math.PI} />
-
-      {/* Popup on Hover */}
+      {/* Hover Card */}
       {hovered && (
         <Html
-          distanceFactor={15}
-          position={[0, 0.1, 0]}
+          distanceFactor={6}
+          position={[0, 0.13, 0]}
           style={{ pointerEvents: "none" }}
           center
         >
           <div
-            className="bg-cyan-500/80 border border-cyan-300/50 rounded-sm shadow-lg backdrop-blur-sm"
-            style={{ width: '10px', height: '10px' }}
-          />
+            className="bg-gray-900/90 rounded-lg overflow-hidden shadow-2xl backdrop-blur-md border border-gray-800"
+            style={{ width: '190px', transform: 'perspective(800px) rotateX(0deg)' }}
+          >
+            {pin.image && (
+              <div className="relative" style={{ height: '180px' }}>
+                <img
+                  src={pin.image}
+                  alt={pin.name}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: 'center' }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-gray-900 to-transparent" />
+              </div>
+            )}
+            <div className="p-3 bg-gray-900/95">
+              <h3 className="text-white font-bold text-sm mb-0.5 leading-tight">{pin.name}</h3>
+              <p className="text-gray-300 text-xs mb-2 leading-tight">{pin.details}</p>
+              <div className="flex items-center gap-1 text-gray-400 text-xs">
+                <span className="text-sm">📍</span>
+                <span>{pin.location}</span>
+              </div>
+            </div>
+          </div>
         </Html>
       )}
     </group>
@@ -169,7 +169,7 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
     }
   });
 
-  // Create geometry for globe points
+  // Create geometry for globe points - only front-facing
   const pointsGeometry = useMemo(() => {
     if (!globeData || !globeData.features) return null;
 
@@ -179,7 +179,7 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
         const coords = feature.geometry.coordinates[0];
         coords.forEach((coord: [number, number]) => {
           const [lng, lat] = coord;
-          const [x, y, z] = latLngToVector3(lat, lng, radius * 1.002);
+          const [x, y, z] = latLngToVector3(lat, lng, radius * 1.001);
           positions.push(x, y, z);
         });
       }
@@ -193,50 +193,43 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
   return (
     <>
       {/* Ambient Light */}
-      <ambientLight intensity={0.3} color={globeConfig.ambientLight || "#ffffff"} />
+      <ambientLight intensity={0.5} color="#ffffff" />
 
       {/* Directional Lights */}
-      <directionalLight
-        position={[-5, 5, 5]}
-        intensity={0.3}
-        color={globeConfig.directionalLeftLight || "#ffffff"}
-      />
-      <directionalLight
-        position={[5, 5, -5]}
-        intensity={0.3}
-        color={globeConfig.directionalTopLight || "#ffffff"}
-      />
+      <directionalLight position={[-8, 5, 8]} intensity={0.8} color="#ffffff" />
+      <directionalLight position={[8, 5, -8]} intensity={0.5} color="#ffffff" />
 
       {/* Point Light */}
-      <pointLight
-        position={[0, 0, 5]}
-        intensity={0.4}
-        color={globeConfig.pointLight || "#ffffff"}
-      />
+      <pointLight position={[0, 8, 5]} intensity={0.4} color="#ffffff" />
 
       <group ref={globeRef}>
-        {/* Globe Sphere */}
+        {/* Globe Sphere - Completely opaque */}
         <mesh>
           <sphereGeometry args={[radius, 64, 64]} />
           <meshPhongMaterial
-            color={globeConfig.globeColor || "#1a237e"}
-            emissive={globeConfig.emissive || "#0a0f2e"}
-            emissiveIntensity={globeConfig.emissiveIntensity || 0.2}
-            shininess={globeConfig.shininess || 10}
+            color={globeConfig.globeColor || "#1a1a1a"}
+            emissive="#000000"
+            emissiveIntensity={0}
+            shininess={20}
             opacity={1}
             transparent={false}
+            side={THREE.FrontSide}
+            depthWrite={true}
+            depthTest={true}
           />
         </mesh>
 
-        {/* Globe Data Points */}
+        {/* Globe Data Points (White dots for continents) */}
         {pointsGeometry && (
           <points geometry={pointsGeometry}>
             <pointsMaterial
-              size={globeConfig.pointSize || 0.003}
-              color={globeConfig.polygonColor || "#4a90e2"}
+              size={globeConfig.pointSize || 0.0025}
+              color={globeConfig.polygonColor || "#ffffff"}
               transparent
-              opacity={0.6}
+              opacity={0.85}
               sizeAttenuation={true}
+              depthTest={true}
+              depthWrite={false}
             />
           </points>
         )}
@@ -247,7 +240,7 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
             key={pin.id}
             pin={pin}
             radius={radius}
-            markerColor={globeConfig.markerColor || "#00d9ff"}
+            markerColor={globeConfig.markerColor || "#ff6b35"}
           />
         ))}
       </group>
@@ -255,23 +248,24 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
       {/* Atmosphere Glow */}
       {globeConfig.showAtmosphere && (
         <mesh>
-          <sphereGeometry args={[radius + (globeConfig.atmosphereAltitude || 0.15), 64, 64]} />
+          <sphereGeometry args={[radius + 0.05, 64, 64]} />
           <meshBasicMaterial
-            color={globeConfig.atmosphereColor || "#4a90e2"}
+            color={globeConfig.atmosphereColor || "#444444"}
             transparent
-            opacity={0.08}
+            opacity={0.15}
             side={THREE.BackSide}
           />
         </mesh>
       )}
 
       <OrbitControls
-        enableZoom={true}
+        enableZoom={false}
         enablePan={false}
-        minDistance={1.8}
-        maxDistance={4}
+        enableRotate={true}
         autoRotate={false}
-        rotateSpeed={0.5}
+        rotateSpeed={0.8}
+        enableDamping={true}
+        dampingFactor={0.05}
       />
     </>
   );

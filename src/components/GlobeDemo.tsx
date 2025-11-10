@@ -4,22 +4,22 @@ import type { PinData } from "./ui/globe";
 
 export function GlobeDemo() {
   const globeConfig = {
-    pointSize: 0.003,
-    globeColor: "#1a237e",
+    pointSize: 0.0025,
+    globeColor: "#1a1a1a",
     showAtmosphere: true,
-    atmosphereColor: "#4a90e2",
-    atmosphereAltitude: 0.15,
-    emissive: "#0a0f2e",
-    emissiveIntensity: 0.2,
-    shininess: 10,
-    polygonColor: "#4a90e2",
+    atmosphereColor: "#444444",
+    atmosphereAltitude: 0.05,
+    emissive: "#000000",
+    emissiveIntensity: 0,
+    shininess: 20,
+    polygonColor: "#ffffff",
     ambientLight: "#ffffff",
     directionalLeftLight: "#ffffff",
     directionalTopLight: "#ffffff",
     pointLight: "#ffffff",
     autoRotate: true,
     autoRotateSpeed: 0.3,
-    markerColor: "#00d9ff",
+    markerColor: "#ff6b35",
   };
 
   const pins: PinData[] = [
@@ -28,7 +28,7 @@ export function GlobeDemo() {
       lat: 43.6,
       lng: 7.0,
       name: "Killian Hayes",
-      details: "Detroit Pistons / NBA",
+      details: "Detroit Pistons",
       location: "Monaco",
       image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=300&fit=crop",
     },
@@ -36,9 +36,9 @@ export function GlobeDemo() {
       id: 2,
       lat: 36.5,
       lng: 36.3,
-      name: "Faouzi Ghoulam",
-      details: "Hatayspor / Super Lig",
-      location: "Algeria",
+      name: "Faouzi Goulham",
+      details: "Hatayspor",
+      location: "Algérie",
       image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop",
     },
     {
@@ -46,7 +46,7 @@ export function GlobeDemo() {
       lat: 34.0,
       lng: -118.0,
       name: "Marcus Johnson",
-      details: "Los Angeles Lakers / NBA",
+      details: "Los Angeles Lakers",
       location: "Los Angeles",
       image: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=400&h=300&fit=crop",
     },
@@ -55,7 +55,7 @@ export function GlobeDemo() {
       lat: 51.5,
       lng: -0.1,
       name: "James Sterling",
-      details: "Chelsea FC / Premier League",
+      details: "Chelsea FC",
       location: "London",
       image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=300&fit=crop",
     },
@@ -64,8 +64,8 @@ export function GlobeDemo() {
       lat: 28.6139,
       lng: 77.209,
       name: "Arjun Patel",
-      details: "Mumbai Indians / IPL",
-      location: "New Delhi, India",
+      details: "Mumbai Indians",
+      location: "New Delhi",
       image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=300&fit=crop",
     },
     {
@@ -73,8 +73,8 @@ export function GlobeDemo() {
       lat: 35.6762,
       lng: 139.6503,
       name: "Yuki Tanaka",
-      details: "Tokyo Giants / NPB",
-      location: "Tokyo, Japan",
+      details: "Tokyo Giants",
+      location: "Tokyo",
       image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=400&h=300&fit=crop",
     },
     {
@@ -82,8 +82,8 @@ export function GlobeDemo() {
       lat: -33.8688,
       lng: 151.2093,
       name: "Jake Williams",
-      details: "Sydney Swans / AFL",
-      location: "Sydney, Australia",
+      details: "Sydney Swans",
+      location: "Sydney",
       image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=300&fit=crop",
     },
     {
@@ -91,8 +91,8 @@ export function GlobeDemo() {
       lat: -23.5505,
       lng: -46.6333,
       name: "Carlos Silva",
-      details: "São Paulo FC / Brasileirão",
-      location: "São Paulo, Brazil",
+      details: "São Paulo FC",
+      location: "São Paulo",
       image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=300&fit=crop",
     },
   ];
@@ -114,11 +114,11 @@ export function GlobeDemo() {
           }}
           className="div"
         >
-          <h2 className="text-center text-xl md:text-4xl font-bold text-white">
+          <h2 className="text-center text-xl md:text-4xl font-bold text-white mb-2">
             Global Athletes Network
           </h2>
-          <p className="text-center text-base md:text-lg font-normal text-gray-300 max-w-md mt-2 mx-auto">
-            Connecting athletes from around the world - hover over the pins to see details
+          <p className="text-center text-base md:text-lg font-normal text-gray-400 max-w-md mt-2 mx-auto">
+            Discover athletes from around the world - hover over the pins to see their profiles
           </p>
         </motion.div>
         <div className="absolute w-full bottom-0 inset-x-0 h-40 bg-gradient-to-b pointer-events-none select-none from-transparent to-black z-40" />
