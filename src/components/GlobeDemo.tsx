@@ -99,7 +99,7 @@ export function GlobeDemo() {
 
   return (
     <div className="flex flex-row items-center justify-center py-20 h-screen md:h-auto bg-black relative" style={{ width: '100%' }}>
-      <div className="mx-auto relative overflow-hidden h-full md:h-[40rem] px-4" style={{ width: '100%', maxWidth: '100%' }}>
+      <div className="mx-auto relative overflow-hidden h-full md:h-[50rem]" style={{ width: '100%', maxWidth: '100%' }}>
         <motion.div
           initial={{
             opacity: 0,
@@ -122,7 +122,7 @@ export function GlobeDemo() {
           </p>
         </motion.div>
         <div className="absolute w-full bottom-0 inset-x-0 h-40 bg-gradient-to-b pointer-events-none select-none from-transparent to-black z-40" />
-        <div className="absolute w-full -bottom-20 h-72 md:h-full z-10" style={{ width: '100%' }}>
+        <div className="absolute inset-0 z-10" style={{ width: '100%', height: '100%' }}>
           <World pins={pins} globeConfig={globeConfig} />
         </div>
       </div>

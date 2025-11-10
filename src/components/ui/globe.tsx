@@ -113,32 +113,31 @@ const Marker = ({ pin, radius, markerColor }: { pin: PinData; radius: number; ma
       {/* Hover Card */}
       {hovered && (
         <Html
-          distanceFactor={6}
-          position={[0, 0.13, 0]}
+          distanceFactor={10}
+          position={[0, 0.08, 0]}
           style={{ pointerEvents: "none" }}
           center
         >
           <div
-            className="bg-gray-900/90 rounded-lg overflow-hidden shadow-2xl backdrop-blur-md border border-gray-800"
-            style={{ width: '190px', transform: 'perspective(800px) rotateX(0deg)' }}
+            className="bg-gray-900/95 rounded overflow-hidden shadow-lg backdrop-blur-sm border border-gray-700"
+            style={{ width: '100px', maxHeight: '100px' }}
           >
             {pin.image && (
-              <div className="relative" style={{ height: '180px' }}>
+              <div className="relative" style={{ height: '60px' }}>
                 <img
                   src={pin.image}
                   alt={pin.name}
                   className="w-full h-full object-cover"
                   style={{ objectPosition: 'center' }}
                 />
-                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-gray-900 to-transparent" />
               </div>
             )}
-            <div className="p-3 bg-gray-900/95">
-              <h3 className="text-white font-bold text-sm mb-0.5 leading-tight">{pin.name}</h3>
-              <p className="text-gray-300 text-xs mb-2 leading-tight">{pin.details}</p>
-              <div className="flex items-center gap-1 text-gray-400 text-xs">
-                <span className="text-sm">📍</span>
-                <span>{pin.location}</span>
+            <div className="p-1 bg-gray-900/95" style={{ maxHeight: '40px' }}>
+              <h3 className="text-white font-semibold text-[8px] mb-0 leading-tight truncate">{pin.name}</h3>
+              <p className="text-gray-400 text-[7px] mb-0.5 leading-tight truncate">{pin.details}</p>
+              <div className="flex items-center gap-0.5 text-gray-500 text-[6px] truncate">
+                <span className="text-[8px]">📍</span>
+                <span className="truncate">{pin.location}</span>
               </div>
             </div>
           </div>
@@ -274,9 +273,9 @@ const GlobeComponent = ({ pins, globeConfig }: WorldProps) => {
 // Main World Component
 export const World = ({ pins, globeConfig }: WorldProps) => {
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
       <Canvas
-        camera={{ position: [0, 0, 2.5], fov: 45 }}
+        camera={{ position: [0, 0, 1.8], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent", width: '100%', height: '100%' }}
       >
